@@ -248,6 +248,7 @@ export default function Home() {
               <div className="flex-1 overflow-hidden flex flex-col print:overflow-visible print:h-auto">
                 {effectiveMode === "edit" ? (
                   <Editor
+                    key={selectedDoc.id}
                     content={selectedDoc.content}
                     onChange={(val) => updateDoc(selectedDoc.id, val)}
                   />

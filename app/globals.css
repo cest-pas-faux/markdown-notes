@@ -63,3 +63,20 @@ body {
   html, body { height: auto !important; }
   .prose a { color: #4338ca; }
 }
+
+/* TipTap editor */
+.prose s { text-decoration: line-through; }
+
+.prose p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: #d1d5db;
+  pointer-events: none;
+  float: left;
+  height: 0;
+}
+.dark .prose p.is-editor-empty:first-child::before { color: #52525b; }
+
+.prose ul[data-type="taskList"] { list-style: none; padding-left: 0.25em; }
+.prose ul[data-type="taskList"] li { display: flex; align-items: baseline; gap: 0.5em; margin: 0.2rem 0; }
+.prose ul[data-type="taskList"] li > label { flex-shrink: 0; }
+.prose ul[data-type="taskList"] li > div { flex: 1; }
