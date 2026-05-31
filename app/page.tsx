@@ -11,7 +11,7 @@ import { Sidebar } from "@/components/Sidebar";
 import { Editor } from "@/components/Editor";
 import { Preview } from "@/components/Preview";
 
-type EditorMode = "edit" | "preview";
+type EditorMode = "edit" | "raw" | "preview";
 
 export default function Home() {
   const {
@@ -29,6 +29,7 @@ export default function Home() {
   const [view, setView] = useState<View>("notes");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [mode, setMode] = useState<EditorMode>("edit");
+  const [editorKey, setEditorKey] = useState(0);
   const [search, setSearch] = useState("");
   const [printPending, setPrintPending] = useState(false);
 
@@ -48,6 +49,11 @@ export default function Home() {
     if (view === "archive" && !archivedDocs.find((d) => d.id === selectedId)) return;
     if (view === "trash"   && !trashedDocs.find((d)  => d.id === selectedId)) return;
   }, [selectedId, view, activeDocs, archivedDocs, trashedDocs]);
+
+  function handleModeChange(m: EditorMode) {
+    if (m === "edit" && mode === "raw") setEditorKey((k) => k + 1);
+    setMode(m);
+  }
 
   function handleExportPdf() {
     setMode("preview");
@@ -137,10 +143,10 @@ export default function Home() {
                   {/* Edit / Preview toggle (hidden for trash) */}
                   {!isReadOnly && (
                     <div className="flex rounded-md overflow-hidden border border-gray-200 dark:border-zinc-600 mr-2">
-                      {(["edit", "preview"] as EditorMode[]).map((m) => (
+                      {(["edit", "raw", "preview"] as EditorMode[]).map((m) => (
                         <button
                           key={m}
-                          onClick={() => setMode(m)}
+                          onClick={() => handleModeChange(m)}
                           className={`px-2.5 py-1 text-xs font-medium capitalize transition-colors ${
                             effectiveMode === m
                               ? "bg-indigo-600 text-white"
@@ -248,7 +254,12 @@ export default function Home() {
               <div className="flex-1 overflow-hidden flex flex-col print:overflow-visible print:h-auto">
                 {effectiveMode === "edit" ? (
                   <Editor
-                    key={selectedDoc.id}
+                    key={selectedDoc.id + "-" + editorKey}
+                    content={selectedDoc.content}
+                    onChange={(val) => updateDoc(selectedDoc.id, val)}
+                  />
+                ) : effectiveMode === "raw" ? (
+                  <RawEditor
                     content={selectedDoc.content}
                     onChange={(val) => updateDoc(selectedDoc.id, val)}
                   />
@@ -267,6 +278,18 @@ export default function Home() {
 }
 
 /* ─── Small helpers ─────────────────────────────────────── */
+
+function RawEditor({ content, onChange }: { content: string; onChange: (v: string) => void }) {
+  return (
+    <textarea
+      value={content}
+      onChange={(e) => onChange(e.target.value)}
+      spellCheck={false}
+      className="w-full h-full resize-none p-6 md:p-8 font-mono text-sm leading-relaxed bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 focus:outline-none"
+      placeholder={"# Document title\n\nStart writing in Markdown…"}
+    />
+  );
+}
 
 function ActionButton({
   title, onClick, icon, active = false, danger = false,
