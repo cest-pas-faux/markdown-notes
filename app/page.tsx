@@ -30,6 +30,7 @@ export default function Home() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [mode, setMode] = useState<EditorMode>("edit");
   const [search, setSearch] = useState("");
+  const [printPending, setPrintPending] = useState(false);
 
   // Deselect if the selected doc is no longer in the current view
   useEffect(() => {
@@ -47,6 +48,11 @@ export default function Home() {
     if (view === "archive" && !archivedDocs.find((d) => d.id === selectedId)) return;
     if (view === "trash"   && !trashedDocs.find((d)  => d.id === selectedId)) return;
   }, [selectedId, view, activeDocs, archivedDocs, trashedDocs]);
+
+  function handleExportPdf() {
+    setMode("preview");
+    setPrintPending(true);
+  }
 
   function handleNewDoc() {
     const id = createDoc();
@@ -80,6 +86,15 @@ export default function Home() {
   const isReadOnly = view === "trash";
   const effectiveMode: EditorMode = isReadOnly ? "preview" : mode;
 
+  useEffect(() => {
+    if (!printPending || effectiveMode !== "preview" || !selectedDoc) return;
+    setPrintPending(false);
+    const original = document.title;
+    document.title = extractTitle(selectedDoc.content) || "Untitled";
+    window.addEventListener("afterprint", () => { document.title = original; }, { once: true });
+    window.print();
+  }, [printPending, effectiveMode, selectedDoc]);
+
   if (!hydrated) {
     return <div className="h-full bg-white dark:bg-zinc-900" />;
   }
@@ -93,7 +108,7 @@ export default function Home() {
         onImport={handleImport}
       />
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden print:block print:overflow-visible">
         <Sidebar
           activeDocs={activeDocs}
           archivedDocs={archivedDocs}
@@ -109,11 +124,11 @@ export default function Home() {
           onNewDoc={handleNewDoc}
         />
 
-        <main className="flex-1 flex flex-col overflow-hidden">
+        <main className="flex-1 flex flex-col overflow-hidden print:overflow-visible print:h-auto">
           {selectedDoc ? (
             <>
               {/* Doc action bar */}
-              <div className="flex items-center justify-between px-4 h-11 border-b border-gray-200 dark:border-zinc-700 flex-shrink-0">
+              <div className="flex items-center justify-between px-4 h-11 border-b border-gray-200 dark:border-zinc-700 flex-shrink-0 print:hidden">
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate max-w-xs">
                   {extractTitle(selectedDoc.content) || "Untitled"}
                 </span>
@@ -142,6 +157,16 @@ export default function Home() {
                   {view === "notes" && (
                     <>
                       <ActionButton
+                        title="Export PDF"
+                        onClick={handleExportPdf}
+                        icon={
+                          <>
+                            <path d="M5 1.5A.5.5 0 0 1 5.5 1h5a.5.5 0 0 1 .5.5V5H5V1.5Z" />
+                            <path fillRule="evenodd" d="M1.5 6A1.5 1.5 0 0 1 3 4.5h10A1.5 1.5 0 0 1 14.5 6v5A1.5 1.5 0 0 1 13 12.5h-1V11a.5.5 0 0 0-.5-.5h-7a.5.5 0 0 0-.5.5v1.5H3A1.5 1.5 0 0 1 1.5 11V6ZM12 7.5a.75.75 0 1 1 0 1.5.75.75 0 0 1 0-1.5ZM4.5 11h7v3.5a.5.5 0 0 1-.5.5h-6a.5.5 0 0 1-.5-.5V11Z" clipRule="evenodd" />
+                          </>
+                        }
+                      />
+                      <ActionButton
                         title={selectedDoc.pinnedAt ? "Unpin" : "Pin"}
                         active={!!selectedDoc.pinnedAt}
                         onClick={() => togglePin(selectedDoc.id)}
@@ -169,6 +194,16 @@ export default function Home() {
 
                   {view === "archive" && (
                     <>
+                      <ActionButton
+                        title="Export PDF"
+                        onClick={handleExportPdf}
+                        icon={
+                          <>
+                            <path d="M5 1.5A.5.5 0 0 1 5.5 1h5a.5.5 0 0 1 .5.5V5H5V1.5Z" />
+                            <path fillRule="evenodd" d="M1.5 6A1.5 1.5 0 0 1 3 4.5h10A1.5 1.5 0 0 1 14.5 6v5A1.5 1.5 0 0 1 13 12.5h-1V11a.5.5 0 0 0-.5-.5h-7a.5.5 0 0 0-.5.5v1.5H3A1.5 1.5 0 0 1 1.5 11V6ZM12 7.5a.75.75 0 1 1 0 1.5.75.75 0 0 1 0-1.5ZM4.5 11h7v3.5a.5.5 0 0 1-.5.5h-6a.5.5 0 0 1-.5-.5V11Z" clipRule="evenodd" />
+                          </>
+                        }
+                      />
                       <ActionButton
                         title="Unarchive"
                         onClick={() => { unarchiveDoc(selectedDoc.id); setSelectedId(null); setView("notes"); }}
@@ -210,7 +245,7 @@ export default function Home() {
               </div>
 
               {/* Editor / Preview */}
-              <div className="flex-1 overflow-hidden flex flex-col">
+              <div className="flex-1 overflow-hidden flex flex-col print:overflow-visible print:h-auto">
                 {effectiveMode === "edit" ? (
                   <Editor
                     content={selectedDoc.content}

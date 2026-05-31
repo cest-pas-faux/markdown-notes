@@ -9,7 +9,7 @@ interface Props {
 
 export function Preview({ content }: Props) {
   return (
-    <div className="w-full h-full overflow-y-auto p-6 md:p-10">
+    <div className="w-full h-full overflow-y-auto p-6 md:p-10 print:h-auto print:overflow-visible">
       <div className="max-w-3xl mx-auto prose dark:prose-invert">
         {content.trim() ? (
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>

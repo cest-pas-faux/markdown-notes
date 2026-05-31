@@ -25,7 +25,7 @@ export function Toolbar({ dark, onToggleDark, onExport, onImport }: Props) {
   }
 
   return (
-    <header className="h-12 flex items-center justify-between px-4 border-b border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 flex-shrink-0">
+    <header className="h-12 flex items-center justify-between px-4 border-b border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 flex-shrink-0 print:hidden">
       <span className="font-semibold text-gray-900 dark:text-gray-100 tracking-tight">
         Markdown Notes
       </span>

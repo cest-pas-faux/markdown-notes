@@ -57,7 +57,7 @@ export function Sidebar({
   };
 
   return (
-    <aside className="w-64 flex-shrink-0 flex flex-col border-r border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800/50 overflow-hidden">
+    <aside className="w-64 flex-shrink-0 flex flex-col border-r border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800/50 overflow-hidden print:hidden">
       {/* Top controls */}
       <div className="p-3 space-y-2 border-b border-gray-200 dark:border-zinc-700">
         <button

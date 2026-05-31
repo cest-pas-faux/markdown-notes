@@ -58,3 +58,8 @@ body {
 .dark .prose hr  { border-color: #3f3f46; }
 .dark .prose th { border-color: #3f3f46; }
 .dark .prose td { border-color: #27272a; }
+
+@media print {
+  html, body { height: auto !important; }
+  .prose a { color: #4338ca; }
+}
